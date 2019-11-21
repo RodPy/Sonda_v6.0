@@ -4,27 +4,27 @@ from Sensores import sensor_temperatura
 from Sensores import i2c
 from sqlite3 import Error
 
-
+tiempo = 10.0
 
 def sql_connection():
     try:
-        conn = sqlite3.connect('Sonda_LSD.db')
+        conn = sqlite3.connect('Sonda_Lago.db')
         return conn
     except Error:
         print(Error)
         
 def sql_table(conn):
     cur =conn.cursor()
-    cur.execute("CREATE TABLE lecturas(N integer PRIMARY KEY AUTOINCREMENT, datatime integer, Tempertatura integer,pH integer,DO integer,CE integer,TDS integer, S integer)")
+    cur.execute("CREATE TABLE lecturas(N integer PRIMARY KEY AUTOINCREMENT, datatime integer, Tempertatura integer,pH integer,DO integer,CE integer,TDS integer, S integer, OPR integer)")
     conn.commit()
 
 def sql_insert(conn,lecturas):
     cur=conn.cursor()
-    cur.execute("INSERT INTO lecturas(datatime,Tempertatura,pH,DO,CE,TDS,S) VALUES(datetime('now','localtime'),?,?,?,?,?,?)",lecturas)
+    cur.execute("INSERT INTO lecturas(datatime,Tempertatura,pH,DO,CE,TDS,S,OPR) VALUES(datetime('now','localtime'),?,?,?,?,?,?,?)",lecturas)
     conn.commit()
     
 conn= sql_connection()
-sql_table(conn)
+##sql_table(conn)
 
 
 c = conn.cursor()
@@ -32,17 +32,23 @@ c = conn.cursor()
 while True:
     temp=sensor_temperatura.read_temp()[0]
     reading_time = time.ctime(time.time())
+    print ("Midiendo OPR: ")
+    OPR= i2c.leerSensores("R","OPR")
+    print ("Midiendo DO: ")
     DO= i2c.leerSensores("R","DO")
+    print ("Midiendo PH: ")
     PH= i2c.leerSensores("R","PH")
+    print ("Midiendo CE: ")
     CEt= i2c.leerSensores("R","CE")
+    print ("DATOS RECOLECTADOS : ")
     #
     CE= CEt[0:4]
     TDS= CEt[5]
     S= CEt[7:11]
     
-    SEN= {"Temp":temp,"DO":DO,"OPR":98,"PH":PH, "CE":CE,"TDS": TDS, "S": S}
+    SEN= {"Temp":temp,"DO":DO,"OPR":OPR,"PH":PH, "CE":CE,"TDS": TDS, "S": S}
     print (SEN)
-    lect=(temp,DO,PH,CE,TDS,S)
+    lect=(temp,DO,PH,CE,TDS,S,OPR)
    ## print (temp)
    ## aux=(temp,temp,temp,temp,temp)
     ##print (reading_time)
@@ -61,5 +67,6 @@ while True:
 #    c.execute('''INSERT INTO lecturasPy(datatime,Tempertatura,pH,CE,TDS,S) VALUES(datetime('now','localtime'),?,?,?,?,?)''', aux)
   #  conn.commit()
     sql_insert(conn,lect)
-    time.sleep(2.0)
+    print ("Carga Exitosa, timepo de espera: " + str(tiempo) +" [s]. ")
+    time.sleep(tiempo)
 
