@@ -31,18 +31,24 @@ c = conn.cursor()
 ##Lectura de Sensores
 while True:
     temp=sensor_temperatura.read_temp()[0]
+    print (temp)
     reading_time = time.ctime(time.time())
     print ("Midiendo OPR: ")
     OPR= i2c.leerSensores("R","OPR")
+    print (OPR)
     print ("Midiendo DO: ")
     DO= i2c.leerSensores("R","DO")
+    print (DO)
     print ("Midiendo PH: ")
     PH= i2c.leerSensores("R","PH")
+    print (PH)
     print ("Midiendo CE: ")
     CEt= i2c.leerSensores("R","CE")
     print ("DATOS RECOLECTADOS : ")
     #
+   ## CEt=[1, 1, 1, 1, 1,1,1,1,1,1,1]
     CE= CEt[0:4]
+    ##CE=1
     TDS= CEt[5]
     S= CEt[7:11]
     
